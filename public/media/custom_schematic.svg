@@ -1,0 +1,12 @@
+<svg width="1200" height="675" viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="450" fill="#181127" />
+  <rect x="24" y="24" width="752" height="402" stroke="#C084FC" stroke-opacity="0.3" stroke-width="1" />
+  <line x1="24" y1="80" x2="776" y2="80" stroke="#FFFFFF" stroke-opacity="0.12" />
+  <line x1="24" y1="370" x2="776" y2="370" stroke="#FFFFFF" stroke-opacity="0.12" />
+  <line x1="400" y1="24" x2="400" y2="426" stroke="#C084FC" stroke-opacity="0.25" stroke-dasharray="4 4" />
+  <rect x="150" y="115" width="500" height="220" stroke="#FFFFFF" stroke-width="1.5" stroke-opacity="0.85" />
+  <rect x="260" y="150" width="280" height="150" stroke="#C084FC" stroke-width="1.5" />
+  <circle cx="400" cy="225" r="54" stroke="#7C3AED" stroke-width="1.5" stroke-dasharray="3 3" />
+  <text x="48" y="58" fill="#C084FC" font-family="monospace" font-size="11" letter-spacing="3">ORALMED — DENTAL-3D-ANATOMY</text>
+  <text x="48" y="404" fill="#FFFFFF" fill-opacity="0.75" font-family="monospace" font-size="10" letter-spacing="2">Vector de micro-movimiento: +0.25mm/etapa   ·   Modelado 3D de oclusión y margen gingival   ·   Ajuste biomecánico con SmartTrack® material   ·   Escaneo digital intraoral de alta definición</text>
+</svg>
