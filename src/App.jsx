@@ -1,751 +1,572 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { ArrowUpRight, Plus, Minus, MapPin, Phone, Clock } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowUpRight, ArrowLeft, MapPin, Phone, Clock, MessageCircle, Sparkles, CheckCircle2 } from 'lucide-react';
 import { TechnicalSchematic, BespokeServiceIcon } from './components/BrandVisuals';
 
-const WHATSAPP_URL =
-  'https://wa.me/18496539421?text=Hola%2C%20vi%20el%20sitio%20web%20de%20OralMed%20y%20me%20gustar%C3%ADa%20agendar%20una%20evaluaci%C3%B3n%20diagn%C3%B3stica%20para%20mi%20sonrisa.';
+const WHATSAPP_BASE = 'https://wa.me/18496539421?text=';
 const INSTAGRAM_URL = 'https://www.instagram.com/oralmedrd/';
 
-const STATS = [
-  { num: '#1', label: 'Centro de referencia Invisalign® en RD' },
-  { num: '25.4K', label: 'Pacientes y seguidores en comunidad' },
-  { num: '+1,800', label: 'Casos y contenido clínico documentados' }
-];
-
-const MATERIALS_SPECS = [
-  { code: '01', name: 'Alineadores removibles Invisalign®' },
-  { code: '02', name: 'Escáner intraoral 3D iTero 5D' },
-  { code: '03', name: 'Sistema de profilaxis AquaCare' },
-  { code: '04', name: 'Carillas y rehabilitación estética' }
-];
-
-const SPECIALTIES = [
+const SERVICES_DATA = [
   {
-    number: '01',
+    id: 'invisalign',
+    slug: 'invisalign',
     title: 'Ortodoncia Invisible Invisalign®',
-    kicker: 'Tecnología de alineación transparente',
-    description:
-      'Como clínica #1 en Invisalign® en la República Dominicana, utilizamos alineadores transparentes removibles diseñados a la medida de tu boca mediante planificación virtual en 3D.',
-    challenge:
-      'Los brackets tradicionales pueden resultar incómodos y estéticamente restrictivos. Con Invisalign® logramos movimientos dentales graduales mediante alineadores prácticamente invisibles.',
-    photo: './media/post_15.jpg',
-    photoAlt: 'Doctora conversando con paciente en consultorio dental moderno de OralMed',
-    features: [
+    shortDesc: 'Alineadores transparentes y removibles planificados con escáner 3D iTero 5D sin usar brackets tradicionales.',
+    heroPhoto: './media/post_21.jpg',
+    photoAlt: 'Alineadores transparentes Invisalign en OralMed',
+    tag: 'Centro #1 Invisalign® en RD',
+    whatsappMessage: 'Hola OralMed, me gustaría consultar sobre el tratamiento de ortodoncia invisible Invisalign®.',
+    fullDesc: 'OralMed es el centro de referencia líder en tecnología Invisalign® en la República Dominicana. Mediante alineadores transparentes hechos a tu medida y planificación virtual en 3D, movemos cada pieza dental de forma predecible y discreta sin alterar tu estilo de vida.',
+    benefits: [
       {
-        title: 'Planificación 3D iTero 5D',
-        desc: 'Visualiza cómo quedará tu sonrisa en 3D desde la primera consulta sin moldes de pasta incómodos.'
+        title: 'Escaneo Digital 3D iTero 5D',
+        desc: 'Visualizas cómo quedará tu sonrisa en 3D desde tu primera cita sin pastas ni moldes molestos.'
       },
       {
-        title: 'Removibles y Transparentes',
-        desc: 'Remuévelos para comer, cepillarte y en eventos especiales sin interrumpir tu rutina diaria.'
+        title: 'Removibles y Discretos',
+        desc: 'Te los quitas cómodamente para comer, cepillarte y asistir a eventos especiales.'
       },
       {
-        title: 'Certificación Provider Diamond Elite',
-        desc: 'Tratamiento guiado por especialistas de amplia trayectoria reconocidos a nivel nacional e internacional.'
+        title: 'Certificación Diamond Elite',
+        desc: 'Tratamiento guiado por ortodoncistas especializadas con alta casuística documentada en el país.'
       }
+    ],
+    steps: [
+      { num: '01', title: 'Escaneo Intraoral 3D', desc: 'Captura digital milimétrica de tu dentición en menos de 5 minutos.' },
+      { num: '02', title: 'Planificación Virtual', desc: 'Diseñamos cada etapa de alineación y proyectamos el resultado final.' },
+      { num: '03', title: 'Entrega de Alineadores', desc: 'Comienzas tu tratamiento con revisiones periódicas ágiles.' }
     ]
   },
   {
-    number: '02',
-    title: 'Limpieza Dental AquaCare (Sin Ansiedad)',
-    kicker: 'Tecnología de aire y fluidos',
-    description:
-      'AquaCare revolucionó el cuidado profiláctico dental. Elimina manchas, placa y sarro mediante una fina brisa de aire y partículas sin contacto directo ni ruidos molestos.',
-    challenge:
-      'Muchas personas posponen su salud bucal por la incomodidad de los raspados tradicionales. AquaCare elimina las molestias físicas garantizando máxima limpieza superficial y profunda.',
-    photo: './media/post_26.jpg',
-    photoAlt: 'Equipo de doctoras en el área clínica de OralMed',
-    features: [
+    id: 'aquacare',
+    slug: 'aquacare',
+    title: 'Limpieza Dental AquaCare (Sin Dolor)',
+    shortDesc: 'Higiene profiláctica avanzada con brisa de aire y fluidos, libre de raspados agresivos y cero vibraciones.',
+    heroPhoto: './media/post_11.jpg',
+    photoAlt: 'Tecnología dental avanzada en consultorio OralMed',
+    tag: 'Tecnología Sin Ansiedad',
+    whatsappMessage: 'Hola OralMed, me gustaría agendar una limpieza dental con la tecnología AquaCare sin dolor.',
+    fullDesc: 'La tecnología AquaCare transforma la profilaxis dental. Limpia y remueve manchas superficiales mediante una suave brisa de aire y micropartículas purificadas sin contacto dental punzante, ideal para personas con sensibilidad o ansiedad al dentista.',
+    benefits: [
       {
-        title: 'Tecnología Sin Contacto Directo',
-        desc: 'Limpia y pule las superficies dentales suavemente sin instrumentos punzantes.'
+        title: 'Cero Raspados Metálicos',
+        desc: 'Elimina manchas de café, té y sarro sin necesidad de curetas agresivas.'
       },
       {
-        title: 'Cero Vibraciones Incómodas',
-        desc: 'Elimina el ruido y la fricción que suelen generar ansiedad clínica.'
+        title: 'Sin Vibraciones Incómodas',
+        desc: 'Despídete del sonido y la fricción que causan tensión en la consulta tradicional.'
       },
       {
-        title: 'Remoción Eficaz de Manchas',
-        desc: 'Ideal para restaurar el tono natural del esmalte de forma rápida y segura.'
+        title: 'Máximo Cuidado del Esmalte',
+        desc: 'Pule y desinfecta las piezas dentales respetando íntegramente la estructura del diente.'
       }
+    ],
+    steps: [
+      { num: '01', title: 'Evaluación y Diagnóstico', desc: 'Revisión general de encías y zonas con acumulación de placa o manchas.' },
+      { num: '02', title: 'Aplicación AquaCare', desc: 'Pulido suave con aire y fluido purificado a temperatura agradable.' },
+      { num: '03', title: 'Sonrisa Radiante', desc: 'Sensación inmediata de frescura, limpieza profunda y brillo natural.' }
     ]
   },
   {
-    number: '03',
+    id: 'estetica-dental',
+    slug: 'estetica-dental',
     title: 'Estética Dental & Carillas',
-    kicker: 'Diseño armónico de sonrisas',
-    description:
-      'Evaluamos minuciosamente cada detalle facial y dental para ofrecer soluciones personalizadas en carillas y diseño estético orientadas a realzar la confianza del paciente.',
-    challenge:
-      'El diseño de sonrisa en OralMed prioriza la conservación de la estructura biológica del diente y la armonía con los rasgos faciales de cada persona.',
-    photo: './media/post_23.jpg',
-    photoAlt: 'Especialista de OralMed mostrando modelo anatómico dental en consultorio',
-    features: [
+    shortDesc: 'Diseño armónico de sonrisas con carillas de cerámica y resina conservando la salud natural de tus dientes.',
+    heroPhoto: './media/post_23.jpg',
+    photoAlt: 'Especialista de OralMed explicando modelo anatómico',
+    tag: 'Armonía y Proporción Facial',
+    whatsappMessage: 'Hola OralMed, quiero una evaluación para diseño de sonrisa y carillas estéticas.',
+    fullDesc: 'Analizamos minuciosamente tus facciones, proporción labial y textura dental para confeccionar carillas que luzcan completamente naturales. Nuestro enfoque es mínimamente invasivo, priorizando siempre la biología dental.',
+    benefits: [
       {
-        title: 'Evaluación Estética Personalizada',
-        desc: 'Análisis minucioso de forma, proporciones y tono natural.'
+        title: 'Diseño Facial Personalizado',
+        desc: 'Proporciones áureas calibradas según la anatomía de tu rostro y tono de piel.'
       },
       {
-        title: 'Materialización de Alta Calidad',
-        desc: 'Uso de cerámicas de alta durabilidad y apariencia auténtica.'
+        title: 'Cerámica de Alta Calidad',
+        desc: 'Materiales translúcidos de máxima resistencia que reproducen el esmalte auténtico.'
       },
       {
-        title: 'Enfoque Conservador',
-        desc: 'Técnicas mínimamente invasivas enfocadas en mantener la salud dental natural.'
+        title: 'Enfoque Bioconservador',
+        desc: 'Preservación rigurosa de la estructura natural del diente sin desgastes innecesarios.'
       }
+    ],
+    steps: [
+      { num: '01', title: 'Sesión Fotográfica & Análisis', desc: 'Estudio de tu sonrisa y definición del objetivo estético deseado.' },
+      { num: '02', title: 'Maqueta de Prueba (Mockup)', desc: 'Visualizas el cambio en tu propia boca antes de fijar las piezas.' },
+      { num: '03', title: 'Cementación Definitiva', desc: 'Fijación de carillas con precisión milimétrica para durabilidad de años.' }
     ]
   },
   {
-    number: '04',
-    title: 'Odontopediatría & Salud Infantil',
-    kicker: 'Cuidado dental libre de miedos',
-    description:
-      'Cuidar los dientes de leche es el cimiento de la dentición definitiva. Nuestra área de odontopediatría brinda atención preventiva y cercana a los más pequeños.',
-    challenge:
-      'Creamos experiencias amigables y educativas que transforman la consulta dental en una visita positiva e instructiva para niños y padres.',
-    photo: './media/post_16.jpg',
-    photoAlt: 'Doctora y paciente sonriendo durante una consulta en OralMed',
-    features: [
+    id: 'odontopediatria',
+    slug: 'odontopediatria',
+    title: 'Odontopediatría & Cuidado Infantil',
+    shortDesc: 'Atención dental cercana, cálida y preventiva para niños, creando experiencias positivas y libres de miedo.',
+    heroPhoto: './media/post_15.jpg',
+    photoAlt: 'Doctora atendiendo amablemente a paciente en OralMed',
+    tag: 'Salud Infantil Cálida',
+    whatsappMessage: 'Hola OralMed, me gustaría agendar una consulta de odontopediatría para mi hijo/a.',
+    fullDesc: 'Acompañamos el desarrollo de los dientes de leche y permanentes en un ambiente empático y afectivo. Nuestro equipo convierte la visita al dentista en una experiencia educativa y relajada tanto para niños como para padres.',
+    benefits: [
       {
-        title: 'Espacio Adaptado y Cálido',
-        desc: 'Ambiente acogedor pensado para transmitir seguridad y tranquilidad a los niños.'
+        title: 'Espacio Seguro y Amable',
+        desc: 'Ambiente diseñado para que los más pequeños se sientan cómodos y tranquilos.'
       },
       {
-        title: 'Odontología Preventiva Infantil',
-        desc: 'Protección de piezas temporales para asegurar una alineación saludable en la etapa adulta.'
+        title: 'Prevención Temprana',
+        desc: 'Sellantes, aplicación de flúor y control de guías de erupción dental.'
       },
       {
-        title: 'Guía Directa para Padres',
-        desc: 'Asesoramiento profesional sobre higiene, cepillado y nutrición para la salud oral infantil.'
+        title: 'Orientación a Padres',
+        desc: 'Guía directa sobre técnicas de cepillado, hábitos y salud bucal en casa.'
       }
+    ],
+    steps: [
+      { num: '01', title: 'Primera Familiarización', desc: 'El niño conoce el consultorio a su propio ritmo sin prisas.' },
+      { num: '02', title: 'Revisión Suave', desc: 'Evaluación preventiva con explicaciones lúdicas y transparentes.' },
+      { num: '03', title: 'Plan de Cuidado', desc: 'Recomendaciones personalizadas para mantener una sonrisa sana.' }
     ]
-  }
-];
-
-const PROCESS_STEPS = [
-  {
-    step: '01',
-    title: 'Diagnóstico & Escaneo 3D iTero 5D',
-    desc: 'Realizamos una evaluación digital precisa de tu boca en minutos sin necesidad de pastas ni moldes molestos.'
-  },
-  {
-    step: '02',
-    title: 'Planificación Digital Personalizada',
-    desc: 'Visualizamos previamente el plan de tratamiento o el movimiento exacto de tus dientes paso a paso.'
-  },
-  {
-    step: '03',
-    title: 'Inicio de Tratamiento & Entrega',
-    desc: 'Colocación de alineadores Invisalign®, inicio de profilaxis AquaCare o procedimiento estético bajo la guía de nuestros doctores.'
-  },
-  {
-    step: '04',
-    title: 'Seguimiento & Mantenimiento de por Vida',
-    desc: 'Monitoreamos la evolución de tu dentición para asegurar la durabilidad y la estética de tu nueva sonrisa.'
-  }
-];
-
-const CLINICAL_CASES = [
-  {
-    code: 'PROYECTO 01',
-    title: 'Mi Invisalign Journey: Transformación de Sonrisa Invisible',
-    category: 'Ortodoncia Invisible',
-    location: 'OralMed, Santo Domingo',
-    challenge:
-      'Alineación de piezas dentales en un paciente adulto que buscaba comodidad, discreción estética total y cero alteración en sus presentaciones públicas.',
-    solution:
-      'Planificación digital completa con el escáner iTero 5D y secuencias de alineadores Invisalign®, logrando resultados evidentes y simetría en tiempo récord.',
-    photo: './media/post_21.jpg',
-    photoAlt: 'Especialista de OralMed sosteniendo estuche de alineadores Invisalign'
-  },
-  {
-    code: 'PROYECTO 02',
-    title: 'Diagnóstico Intraoral Digital iTero 5D & Experiencia AquaCare',
-    category: 'Diagnóstico y Profilaxis',
-    location: 'OralMed, Santo Domingo',
-    challenge:
-      'Paciente con sensibilidad dental que manifestaba alta ansiedad hacia la profilaxis ultrasónica tradicional con raspado e instrumentos ruidosos.',
-    solution:
-      'Implementación de profilaxis con tecnología AquaCare para remover manchas e impurezas sin contacto físico violento, combinado con escaneo digital 3D iTero 5D.',
-    photo: './media/post_27.jpg',
-    photoAlt: 'Espacio interior cálido con acabados de madera en OralMed'
-  },
-  {
-    code: 'PROYECTO 03',
-    title: 'Evaluación Estética y Planificación de Carillas',
-    category: 'Diseño de Sonrisa',
-    location: 'OralMed, Santo Domingo',
-    challenge:
-      'Requerimiento de corrección anatómica de bordes dentales y mejora del tono del esmalte con preservación de la estructura natural.',
-    solution:
-      'Estudio fotográfico y clínico liderado por el equipo médico para definir el volumen exacto y la tonalidad armónica antes de la confección de piezas estéticas.',
-    photo: './media/post_1.jpg',
-    photoAlt: 'Detalle de textura y armonía estética en OralMed'
-  }
-];
-
-const FAQS = [
-  {
-    q: '¿Dónde está ubicada exactamente la clínica dental OralMed?',
-    a: 'Nos encontramos ubicados en la Av. Tiradentes #29, en el sector de Naco, Santo Domingo, República Dominicana.'
-  },
-  {
-    q: '¿Cuáles son los horarios de atención de OralMed?',
-    a: 'Atendemos de Lunes a Viernes de 9:00 AM a 7:00 PM y los Sábados de 9:00 AM a 2:00 PM.'
-  },
-  {
-    q: '¿Por qué elegir Invisalign® frente a los brackets tradicionales?',
-    a: 'Invisalign® utiliza alineadores transparentes, estéticos y totalmente removibles que te permiten comer lo que desees y cepillarte sin trabas, enderezando tus dientes con máxima discreción y comodidad.'
-  },
-  {
-    q: '¿En qué consiste el sistema de limpieza AquaCare?',
-    a: 'AquaCare es una tecnología avanzada que realiza la limpieza profiláctica mediante una brisa de aire y fluidos sin necesidad de raspados metálicos ni vibraciones molestas, ideal para pacientes con sensibilidad o ansiedad al dentista.'
-  },
-  {
-    q: '¿Cómo puedo agendar una cita o consulta en la clínica?',
-    a: 'Puedes reservar tu cupo escribiéndonos a nuestro número de WhatsApp +1 (849) 653-9421 o llamando directamente al +1 (809) 475-7585.'
   }
 ];
 
 export default function App() {
-  const [selectedCaseIndex, setSelectedCaseIndex] = useState(0);
-  const [openFaq, setOpenFaq] = useState(0);
+  const [currentView, setCurrentView] = useState('home');
+  const [selectedServiceId, setSelectedServiceId] = useState(null);
+
+  // Sincronización limpia con el hash de la URL para navegación multi-página
+  useEffect(() => {
+    const handleHash = () => {
+      const hash = window.location.hash.replace(/^#\/?/, '');
+      if (hash.startsWith('servicios/')) {
+        const slug = hash.replace('servicios/', '');
+        const found = SERVICES_DATA.find((s) => s.slug === slug);
+        if (found) {
+          setCurrentView('service');
+          setSelectedServiceId(found.id);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return;
+        }
+      }
+      setCurrentView('home');
+      setSelectedServiceId(null);
+    };
+
+    handleHash();
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
+  }, []);
+
+  const navigateToService = (serviceId) => {
+    window.location.hash = `#/servicios/${serviceId}`;
+  };
+
+  const navigateToHome = () => {
+    window.location.hash = '#/';
+  };
+
+  const activeService = SERVICES_DATA.find((s) => s.id === selectedServiceId) || SERVICES_DATA[0];
 
   return (
     <div className="site-wrapper">
-      {/* STICKY HEADER */}
+      {/* HEADER / NAVBAR */}
       <header className="site-header">
         <div className="nav-inner">
-          <a href="#portada" className="brand-link">
+          <div className="brand-link" onClick={navigateToHome}>
             <img
-              src="./media/logo_web.png"
-              alt="OralMed Logo"
+              src="./media/logo_real.jpg"
+              alt="OralMed Clínica Dental"
               className="brand-logo-img"
             />
             <div>
               <span className="brand-name">OralMed</span>
-              <span className="brand-sub">Clínica Dental · Naco, SD</span>
+              <span className="brand-sub">Centro Especializado Invisalign® · Naco</span>
             </div>
-          </a>
+          </div>
 
-          <nav className="nav-links" aria-label="Navegación principal">
-            <a href="#especialidades">Especialidades</a>
-            <a href="#tecnologia">Tecnología 3D</a>
-            <a href="#casos">Casos Clínicos</a>
-            <a href="#equipo">Dirección Clínica</a>
-            <a href="#contacto">Ubicación & Citas</a>
+          <nav className="nav-links">
+            <button className="nav-link-btn" onClick={navigateToHome}>
+              Inicio
+            </button>
+            <button className="nav-link-btn" onClick={() => navigateToService('invisalign')}>
+              Invisalign®
+            </button>
+            <button className="nav-link-btn" onClick={() => navigateToService('aquacare')}>
+              AquaCare
+            </button>
+            <button className="nav-link-btn" onClick={() => navigateToService('estetica-dental')}>
+              Estética
+            </button>
+            <button className="nav-link-btn" onClick={() => navigateToService('odontopediatria')}>
+              Odontopediatría
+            </button>
+            <a href="#sede" className="nav-link-btn" onClick={() => { if (currentView !== 'home') navigateToHome(); }}>
+              Sede Naco
+            </a>
           </nav>
 
-          <a
-            href={WHATSAPP_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-primary"
-          >
-            <span>Agendar Evaluación</span>
-            <ArrowUpRight size={17} />
-          </a>
+          <div className="nav-actions">
+            <a
+              href={`${WHATSAPP_BASE}${encodeURIComponent('Hola OralMed, vi su sitio web y me gustaría agendar una evaluación para mi sonrisa.')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-primary"
+            >
+              <span>Agendar Cita</span>
+              <ArrowUpRight size={16} />
+            </a>
+          </div>
         </div>
       </header>
 
       <main>
-        {/* SECTION 1: HERO TECHNICAL DOSSIER GRID */}
-        <section id="portada" className="hero-dossier-section">
-          <div className="dossier-container">
-            {/* Top Technical Coordinates & Specs Bar */}
-            <div className="dossier-top-bar">
-              <div className="dossier-meta-cell">
-                <span className="mono-label">Ubicación Verificada</span>
-                <span className="mono-value">Av. Tiradentes #29, Naco · Santo Domingo</span>
-              </div>
-              <div className="dossier-meta-cell">
-                <span className="mono-label">Disciplinas Clínicas</span>
-                <span className="mono-value">Invisalign® · Escáner 3D iTero 5D · Profilaxis AquaCare · Estética</span>
-              </div>
-              <div className="dossier-meta-cell">
-                <span className="mono-label">Dirección Médica</span>
-                <span className="mono-value">Dra. Sylvia Paulino & Equipo Especializado</span>
-              </div>
-            </div>
-
-            {/* Central Asymmetric Grid */}
-            <div className="dossier-main-grid">
-              <motion.div
-                className="dossier-narrative-col"
-                initial={{ opacity: 0, y: 18 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.45, ease: 'easeOut' }}
-              >
-                <div>
-                  <h1 className="hero-headline">
-                    Transformamos tu sonrisa con{' '}
-                    <span className="hero-headline-accent">tecnología 3D</span> y calidez humana.
-                  </h1>
-                  <p className="hero-subheadline">
-                    Centro odontológico #1 en Invisalign® en República Dominicana. Diagnóstico digital con escáner intraoral iTero 5D, profilaxis sin ansiedad AquaCare y estética dental conservadora en Naco, Santo Domingo.
-                  </p>
-
-                  <div className="hero-actions">
-                    <a
-                      href={WHATSAPP_URL}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn-primary"
-                    >
-                      <span>Agendar por WhatsApp</span>
-                      <ArrowUpRight size={18} />
-                    </a>
-                    <a
-                      href={INSTAGRAM_URL}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn-outline"
-                    >
-                      <span>@oralmedrd</span>
-                      <ArrowUpRight size={17} />
-                    </a>
-                  </div>
-                </div>
-
-                {/* Verified Metrics Matrix */}
-                <div className="dossier-stats-row">
-                  {STATS.map((stat, idx) => (
-                    <div key={idx}>
-                      <div className="stat-item-num">{stat.num}</div>
-                      <p className="stat-item-label">{stat.label}</p>
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
-
-              {/* Right Column: Architectural & Clinical Frame + Materials Drawer */}
-              <div className="dossier-visual-col">
-                <div className="dossier-hero-figure">
-                  <img
-                    src="./media/post_2.jpg"
-                    alt="Sede institucional de OralMed en Av. Tiradentes #29, Naco"
-                  />
-                  <div className="dossier-figure-caption">
-                    <div>
-                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--lilac-accent)' }}>
-                        SEDE PRINCIPAL · NACO
-                      </div>
-                      <div style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.05rem' }}>
-                        OralMed Clínica Dental & Centro Especializado Invisalign®
-                      </div>
-                    </div>
-                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', opacity: 0.85 }}>
-                      ¡Sonríe más!
-                    </span>
-                  </div>
-                </div>
-
-                <div className="dossier-spec-drawer">
-                  {MATERIALS_SPECS.map((item) => (
-                    <div key={item.code} className="spec-line">
-                      <span className="spec-index">[{item.code}]</span>
-                      <span>{item.name}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* SECTION 2: ESPECIALIDADES ORTODÓNTICAS & CLÍNICAS */}
-        <section id="especialidades" className="specialties-section">
-          <div className="section-container">
-            <div className="section-header-split">
-              <h2 className="section-title">
-                Especialidades diseñadas para una odontología precisa y sin ansiedad.
-              </h2>
-              <p className="section-lead">
-                Cada tratamiento en OralMed integra diagnóstico digital y protocolos mínimamente invasivos para cuidar tanto la estética como la estructura biológica de tu sonrisa.
-              </p>
-            </div>
-
-            <div className="specialty-editorial-list">
-              {SPECIALTIES.map((service, idx) => (
-                <motion.article
-                  key={service.number}
-                  className="specialty-row"
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: '-60px' }}
-                  transition={{ duration: 0.4, delay: idx * 0.06 }}
-                >
-                  <div className="specialty-identity">
-                    <BespokeServiceIcon index={idx} size={46} />
-                    <div>
-                      <span className="specialty-num">{service.number}</span>
-                      <h3 className="specialty-title">{service.title}</h3>
-                      <p className="specialty-kicker">{service.kicker}</p>
-                    </div>
-                  </div>
-
-                  <div className="specialty-body">
-                    <p className="specialty-desc">{service.description}</p>
-                    <p className="specialty-challenge">{service.challenge}</p>
-
-                    <div className="specialty-features-grid">
-                      {service.features.map((feat, fIdx) => (
-                        <div key={fIdx} className="feature-item">
-                          <h4 className="feature-item-title">{feat.title}</h4>
-                          <p className="feature-item-desc">{feat.desc}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="specialty-photo-wrap">
-                    <img
-                      src={service.photo}
-                      alt={service.photoAlt}
-                      loading="lazy"
-                    />
-                  </div>
-                </motion.article>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* SECTION 3: VISUALIZADOR DE TECNOLOGÍA 3D & PROCESO CLÍNICO (#181127) */}
-        <section id="tecnologia" className="tech-blueprint-section">
-          <div className="section-container">
-            <div className="section-header-split">
-              <h2 className="section-title" style={{ color: 'var(--text-light)' }}>
-                Ingeniería intraoral 3D: planificación milimétrica con iTero 5D.
-              </h2>
-              <p className="section-lead" style={{ color: 'var(--text-light-muted)' }}>
-                A través del escáner intraoral 3D iTero 5D y el sistema AquaCare, proyectamos cada movimiento dental en tiempo real antes de colocar el primer alineador.
-              </p>
-            </div>
-
-            <div className="tech-grid-layout">
-              {/* Interactive Custom CAD / 3D Dental Anatomy Blueprint */}
-              <TechnicalSchematic darkOverride={true} />
-
-              {/* Real iTero 5D Scanner Station Photo & Direct Consultation Card */}
-              <div className="tech-scanner-card">
-                <div className="tech-scanner-photo">
-                  <img
-                    src="./media/post_11.jpg"
-                    alt="Especialista de OralMed utilizando escáner dental digital iTero 5D frente a pantalla con modelos 3D"
-                    loading="lazy"
-                  />
-                </div>
-                <div className="tech-scanner-info">
-                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--lilac-accent)' }}>
-                    ESCÁNER INTRAORAL 3D ITERO 5D
-                  </div>
-                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.35rem', fontWeight: 700, color: 'var(--text-light)' }}>
-                    Simulación digital inmediata sin moldes de pasta
-                  </h3>
-                  <p style={{ fontSize: '0.92rem', color: 'var(--text-light-muted)', lineHeight: 1.6 }}>
-                    Capturamos miles de fotogramas por segundo para construir un modelo 3D de alta definición de tu dentición y simular el resultado de tu tratamiento Invisalign®.
-                  </p>
-                  <a
-                    href={WHATSAPP_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn-light"
-                    style={{ marginTop: '0.5rem', width: '100%' }}
-                  >
-                    <span>Solicitar Escaneo 3D</span>
-                    <ArrowUpRight size={17} />
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            {/* 4-Step Verified Clinical Process */}
-            <div className="process-strip">
-              {PROCESS_STEPS.map((item) => (
-                <div key={item.step}>
-                  <div className="process-step-num">PASO {item.step}</div>
-                  <h3 className="process-step-title">{item.title}</h3>
-                  <p className="process-step-desc">{item.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* SECTION 4: CASOS CLÍNICOS DOCUMENTADOS & RESOLUCIÓN BIOMECÁNICA */}
-        <section id="casos" className="cases-section">
-          <div className="section-container">
-            <div className="section-header-split">
-              <div>
-                <h2 className="section-title">
-                  Casos clínicos y protocolos aplicados en Santo Domingo.
-                </h2>
-              </div>
-              <p className="section-lead">
-                Documentación real de tratamientos de ortodoncia invisible, profilaxis sin contacto AquaCare y diseño de sonrisa conservador realizados en nuestra sede de Naco.
-              </p>
-            </div>
-
-            <div className="cases-interactive-bar" role="tablist" aria-label="Selección de casos clínicos">
-              {CLINICAL_CASES.map((c, idx) => (
-                <button
-                  key={c.code}
-                  type="button"
-                  onClick={() => setSelectedCaseIndex(idx)}
-                  className={`case-filter-btn ${selectedCaseIndex === idx ? 'active' : ''}`}
-                >
-                  {c.code} · {c.category}
-                </button>
-              ))}
-            </div>
-
-            <div className="cases-asymmetric-grid">
-              {CLINICAL_CASES.map((project, idx) => (
-                <article
-                  key={project.code}
-                  className={`case-dossier-item ${selectedCaseIndex === idx ? 'highlighted' : ''}`}
-                  onClick={() => setSelectedCaseIndex(idx)}
-                >
-                  <div className="case-figure">
-                    <img
-                      src={project.photo}
-                      alt={project.photoAlt}
-                      loading="lazy"
-                    />
-                  </div>
-                  <div className="case-content">
-                    <div className="case-meta-line">
-                      <span>{project.code}</span>
-                      <span>{project.category}</span>
-                    </div>
-                    <h3 className="case-title">{project.title}</h3>
-
-                    <div className="case-comparison-box">
-                      <div>
-                        <span className="comparison-label">Diagnóstico / Reto Clínico</span>
-                        <p style={{ color: 'var(--text-muted)' }}>{project.challenge}</p>
-                      </div>
-                      <div>
-                        <span className="comparison-label" style={{ color: 'var(--accent)' }}>
-                          Solución Digital OralMed
-                        </span>
-                        <p style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{project.solution}</p>
-                      </div>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* SECTION 5: DIRECCIÓN CLÍNICA & EQUIPO MULTIDISCIPLINARIO */}
-        <section id="equipo" className="team-philosophy-section">
-          <div className="section-container">
-            <div className="team-editorial-grid">
-              <div>
-                <div className="mono-label" style={{ color: 'var(--accent)' }}>
-                  Dirección Clínica & Ortodoncia Especializada
-                </div>
-                <h2 className="section-title" style={{ marginTop: '0.5rem' }}>
-                  Dra. Sylvia Paulino & Equipo OralMed
-                </h2>
-
-                <blockquote className="editorial-quote">
-                  “Detrás de cada sonrisa hay una historia, detrás de cada tratamiento un propósito y detrás de cada resultado personas que aman lo que hacen.”
-                </blockquote>
-
-                <p className="section-lead" style={{ marginBottom: '1rem' }}>
-                  OralMed es una clínica dental de vanguardia ubicada en el sector de Naco, Santo Domingo, reconocida como el centro #1 en tratamientos Invisalign® en República Dominicana. Liderada por la Dra. Sylvia Paulino y un equipo multidisciplinario de especialistas, la clínica combina la máxima precisión clínica con una filosofía profundamente humana orientada a la confianza del paciente.
-                </p>
-
-                <p className="section-lead">
-                  A través de tecnología de última generación como el escáner intraoral iTero 5D y el sistema de profilaxis avanzada AquaCare, OralMed transforma la experiencia odontológica tradicional en un proceso digital, cómodo y libre de ansiedad.
-                </p>
-
-                <div style={{ marginTop: '2rem', display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
-                  <a
-                    href={WHATSAPP_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn-primary"
-                  >
-                    <span>Conversar con Recepción</span>
-                    <ArrowUpRight size={17} />
-                  </a>
-                  <a
-                    href={INSTAGRAM_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn-outline"
-                  >
-                    <span>Ver Comunidad en Instagram</span>
-                    <ArrowUpRight size={17} />
-                  </a>
-                </div>
-              </div>
-
-              <div className="team-dual-gallery">
-                <div className="team-photo-primary">
-                  <img
-                    src="./media/post_24.jpg"
-                    alt="Profesionales de la clínica OralMed en recepción"
-                    loading="lazy"
-                  />
-                </div>
-                <div className="team-photo-secondary">
-                  <img
-                    src="./media/post_18.jpg"
-                    alt="Equipo médico odontológico de OralMed"
-                    loading="lazy"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* SECTION 6: PREGUNTAS FRECUENTES & AGENDAMIENTO DIRECTO EN NACO */}
-        <section id="contacto" className="contact-faq-section">
-          <div className="section-container">
-            <div className="contact-faq-grid">
-              {/* Left: FAQ Accordion */}
-              <div>
-                <h2 className="section-title">
-                  Información clave antes de tu visita.
-                </h2>
-                <p className="section-lead" style={{ marginTop: '0.75rem' }}>
-                  Respuestas claras sobre nuestra ubicación en Naco, horarios de consulta y tecnologías clínicas.
-                </p>
-
-                <div className="faq-list">
-                  {FAQS.map((faq, idx) => {
-                    const isOpen = openFaq === idx;
-                    return (
-                      <div key={idx} className="faq-item">
-                        <button
-                          type="button"
-                          className="faq-trigger"
-                          onClick={() => setOpenFaq(isOpen ? -1 : idx)}
-                          aria-expanded={isOpen}
-                        >
-                          <span>{faq.q}</span>
-                          {isOpen ? <Minus size={18} /> : <Plus size={18} />}
-                        </button>
-                        {isOpen && <p className="faq-answer">{faq.a}</p>}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Right: High-Contrast Direct Booking Monolith */}
-              <div className="booking-monolith">
-                <div className="booking-monolith-photo">
-                  <img
-                    src="./media/post_19.jpg"
-                    alt="Integrantes del equipo dental de OralMed"
-                    loading="lazy"
-                  />
-                </div>
-                <div className="booking-monolith-body">
+        <AnimatePresence mode="wait">
+          {currentView === 'home' ? (
+            /* =================== VISTA 1: PORTADA HOME (MINIMALISTA) =================== */
+            <motion.div
+              key="home"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+            >
+              {/* HERO: FOTO DE PACIENTE SONRIENDO + TITULAR DIRECTO */}
+              <section className="hero-section">
+                <div className="hero-grid">
                   <div>
-                    <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.6rem, 2.5vw, 2.1rem)', fontWeight: 700, lineHeight: 1.15 }}>
-                      Agenda tu evaluación diagnóstica en OralMed
-                    </h3>
-                    <p style={{ color: 'var(--text-light-muted)', marginTop: '0.65rem', fontSize: '0.96rem' }}>
-                      Escríbenos directamente por WhatsApp o llámanos para coordinar tu cita de Invisalign®, profilaxis AquaCare, estética dental u odontopediatría.
+                    <span className="hero-tag">
+                      <Sparkles size={14} />
+                      Clínica #1 en Invisalign® en República Dominicana
+                    </span>
+                    <h1 className="hero-title">
+                      Sonrisas reales diseñadas con <span className="hero-title-accent">tecnología 3D</span> y calidez humana.
+                    </h1>
+                    <p className="hero-sub">
+                      Centro odontológico de referencia en Naco, Santo Domingo. Especialistas en alineación invisible Invisalign®, profilaxis sin dolor AquaCare y estética dental de alta precisión.
                     </p>
-                  </div>
 
-                  <div className="booking-detail-grid">
-                    <div>
-                      <div className="booking-detail-label">Dirección Clínica</div>
-                      <div className="booking-detail-val" style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-                        <MapPin size={16} color="#C084FC" />
-                        <span>Av. Tiradentes #29, Naco, Santo Domingo</span>
-                      </div>
-                    </div>
-
-                    <div>
-                      <div className="booking-detail-label">Teléfono Directo</div>
+                    <div className="hero-actions">
                       <a
-                        href="tel:+18094757585"
-                        className="booking-detail-val"
-                        style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}
+                        href={`${WHATSAPP_BASE}${encodeURIComponent('Hola OralMed, deseo solicitar una evaluación diagnóstica de mi sonrisa en su sede de Naco.')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn-primary"
                       >
-                        <Phone size={16} color="#C084FC" />
-                        <span>+1 (809) 475-7585</span>
+                        <MessageCircle size={18} />
+                        <span>Agendar por WhatsApp</span>
+                      </a>
+                      <a href="#especialidades" className="btn-secondary">
+                        <span>Ver Especialidades</span>
                       </a>
                     </div>
 
-                    <div style={{ gridColumn: '1 / -1' }}>
-                      <div className="booking-detail-label">Horario de Atención</div>
-                      <div className="booking-detail-val" style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-                        <Clock size={16} color="#C084FC" />
-                        <span>Lunes a Viernes 9:00 AM – 7:00 PM · Sábados 9:00 AM – 2:00 PM</span>
+                    <div className="hero-badges-row">
+                      <div className="hero-badge-item">
+                        <span className="hero-badge-num">Diamond Elite</span>
+                        <span className="hero-badge-label">Referencia Invisalign® RD</span>
+                      </div>
+                      <div className="hero-badge-item">
+                        <span className="hero-badge-num">iTero 5D</span>
+                        <span className="hero-badge-label">Escaneo intraoral 3D</span>
+                      </div>
+                      <div className="hero-badge-item">
+                        <span className="hero-badge-num">+25,000</span>
+                        <span className="hero-badge-label">Pacientes en comunidad</span>
                       </div>
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.9rem' }}>
+                  {/* FOTOGRAFÍA HUMANA DE ALTA CALIDAD (PACIENTE Y DOCTORA EN CONSULTA) */}
+                  <div className="hero-visual-frame">
+                    <img
+                      src="./media/post_16.jpg"
+                      alt="Doctora y paciente sonriendo en consultorio clínico de OralMed"
+                    />
+                    <div className="hero-floating-pill">
+                      <div>
+                        <div className="floating-pill-title">Dra. Sylvia Paulino & Equipo</div>
+                        <div className="floating-pill-sub">Atención odontológica personalizada</div>
+                      </div>
+                      <a
+                        href={INSTAGRAM_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn-text"
+                      >
+                        @oralmedrd
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* SECCIÓN ESPECIALIDADES (CONEXIÓN DIRECTA A PÁGINAS DEDICADAS) */}
+              <section id="especialidades" className="section-wrapper" style={{ backgroundColor: 'var(--bg-secondary)', borderRadius: '28px', margin: '2rem auto' }}>
+                <div className="section-header-clean">
+                  <span className="section-tag">Especialidades Clínicas</span>
+                  <h2 className="section-title">Cuidado dental avanzado para cada etapa de tu vida</h2>
+                </div>
+
+                <div className="services-overview-grid">
+                  {SERVICES_DATA.map((service, idx) => (
+                    <div key={service.id} className="service-card-clean">
+                      <div>
+                        <div className="service-card-icon-wrap">
+                          <BespokeServiceIcon
+                            title={service.title}
+                            category={service.tag}
+                            index={idx}
+                            size={44}
+                          />
+                        </div>
+                        <h3 className="service-card-title">{service.title}</h3>
+                        <p className="service-card-desc">{service.shortDesc}</p>
+                      </div>
+
+                      <button
+                        type="button"
+                        className="btn-text"
+                        onClick={() => navigateToService(service.id)}
+                      >
+                        <span>Conocer más detalles</span>
+                        <ArrowUpRight size={16} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              {/* SIMULADOR / VISUALIZADOR INTERACTIVO DE TRATAMIENTOS EN CÓDIGO */}
+              <section className="section-wrapper">
+                <div className="section-header-clean">
+                  <span className="section-tag">Innovación Clínica</span>
+                  <h2 className="section-title">Visualizador interactivo de procedimientos</h2>
+                </div>
+
+                <TechnicalSchematic />
+              </section>
+
+              {/* EQUIPO MÉDICO & FILOSOFÍA */}
+              <section className="section-wrapper" style={{ borderTop: '1px solid var(--border-hairline)' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem', alignItems: 'center' }}>
+                  <div className="subpage-photo-frame">
+                    <img
+                      src="./media/post_26.jpg"
+                      alt="Equipo de doctoras especialistas de OralMed"
+                    />
+                  </div>
+                  <div>
+                    <span className="section-tag">Dirección Médica</span>
+                    <h2 className="section-title" style={{ marginBottom: '1.25rem' }}>
+                      Profesionales apasionadas por tu salud y bienestar
+                    </h2>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem', lineHeight: 1.65, marginBottom: '1.5rem' }}>
+                      Bajo la dirección de la <strong>Dra. Sylvia Paulino</strong> y la <strong>Dra. Vivianna Tavárez</strong>, en OralMed combinamos tecnología diagnóstica de última generación con un trato humano, transparente y afectivo.
+                    </p>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.98rem', lineHeight: 1.6, marginBottom: '2rem' }}>
+                      Cada tratamiento es planificado minuciosamente para ofrecer resultados estéticos naturales y duraderos en un entorno libre de ansiedad.
+                    </p>
                     <a
-                      href={WHATSAPP_URL}
+                      href={`${WHATSAPP_BASE}${encodeURIComponent('Hola Dra. Sylvia Paulino, me gustaría coordinar una cita en OralMed.')}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="btn-primary"
-                      style={{ flex: 1, minWidth: '220px' }}
                     >
-                      <span>Agendar Cita por WhatsApp</span>
-                      <ArrowUpRight size={18} />
-                    </a>
-                    <a
-                      href={INSTAGRAM_URL}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn-light"
-                    >
-                      <span>Instagram</span>
-                      <ArrowUpRight size={17} />
+                      <span>Conversar con el Equipo</span>
+                      <ArrowUpRight size={16} />
                     </a>
                   </div>
                 </div>
+              </section>
+
+              {/* SEDE & UBICACIÓN EN NACO (AQUÍ VA LA FOTO DEL EDIFICIO/SEDE REAL) */}
+              <section id="sede" className="location-section section-wrapper" style={{ maxWidth: '100%' }}>
+                <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
+                  <div className="location-grid">
+                    <div>
+                      <span className="section-tag">Sede Principal</span>
+                      <h2 className="section-title">Instalaciones modernas en el centro de Naco</h2>
+                      <p style={{ color: 'var(--text-muted)', fontSize: '1rem', marginTop: '0.75rem' }}>
+                        Espacios clínicos diseñados para tu confort y tranquilidad durante cada consulta.
+                      </p>
+
+                      <div className="location-info-list">
+                        <div className="location-info-item">
+                          <MapPin size={22} />
+                          <div>
+                            <div className="location-info-title">Dirección</div>
+                            <div className="location-info-desc">Av. Tiradentes #29, Sector Naco · Santo Domingo, RD</div>
+                          </div>
+                        </div>
+
+                        <div className="location-info-item">
+                          <Clock size={22} />
+                          <div>
+                            <div className="location-info-title">Horarios de Atención</div>
+                            <div className="location-info-desc">Lunes a Viernes: 9:00 AM – 7:00 PM | Sábados: 9:00 AM – 2:00 PM</div>
+                          </div>
+                        </div>
+
+                        <div className="location-info-item">
+                          <Phone size={22} />
+                          <div>
+                            <div className="location-info-title">Teléfonos & WhatsApp</div>
+                            <div className="location-info-desc">+1 (809) 475-7585 | WhatsApp: +1 (849) 653-9421</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                        <a
+                          href="https://maps.google.com/?q=OralMed+Clinica+Dental+Av+Tiradentes+29+Naco"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="btn-secondary"
+                        >
+                          <MapPin size={16} />
+                          <span>Abrir en Google Maps</span>
+                        </a>
+                        <a
+                          href={`${WHATSAPP_BASE}${encodeURIComponent('Hola OralMed, quiero consultar disponibilidad de citas para esta semana.')}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="btn-primary"
+                        >
+                          <MessageCircle size={16} />
+                          <span>Escribir por WhatsApp</span>
+                        </a>
+                      </div>
+                    </div>
+
+                    {/* FOTO EXTERIOR / SEDE INSTITUCIONAL (POST_2.JPG EN SU LUGAR CORRECTO) */}
+                    <div className="location-photo-frame">
+                      <img
+                        src="./media/post_2.jpg"
+                        alt="Edificio sede de OralMed en Av. Tiradentes #29, Naco"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </motion.div>
+          ) : (
+            /* =================== VISTA 2: PÁGINA DEDICADA DE SERVICIO =================== */
+            <motion.div
+              key={activeService.id}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.25 }}
+              className="subpage-wrapper"
+            >
+              {/* BARRA DE RETORNO */}
+              <div className="subpage-back-bar">
+                <button
+                  type="button"
+                  className="subpage-back-btn"
+                  onClick={navigateToHome}
+                >
+                  <ArrowLeft size={16} />
+                  <span>Volver a la portada principal</span>
+                </button>
               </div>
-            </div>
-          </div>
-        </section>
+
+              {/* HERO DE LA PÁGINA DEDICADA CON FOTO ESPECÍFICA */}
+              <div className="subpage-hero">
+                <div className="subpage-detail-col">
+                  <span className="section-tag">{activeService.tag}</span>
+                  <h1>{activeService.title}</h1>
+                  <p>{activeService.fullDesc}</p>
+
+                  <a
+                    href={`${WHATSAPP_BASE}${encodeURIComponent(activeService.whatsappMessage)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-primary"
+                    style={{ padding: '0.85rem 1.75rem', fontSize: '0.96rem' }}
+                  >
+                    <MessageCircle size={18} />
+                    <span>Consultar por este tratamiento</span>
+                  </a>
+                </div>
+
+                <div className="subpage-photo-frame">
+                  <img
+                    src={activeService.heroPhoto}
+                    alt={activeService.photoAlt}
+                  />
+                </div>
+              </div>
+
+              {/* BENEFICIOS ESPECÍFICOS DEL SERVICIO */}
+              <div style={{ marginBottom: '3.5rem' }}>
+                <span className="section-tag">Ventajas Clínicas</span>
+                <h2 className="section-title" style={{ marginBottom: '1.75rem' }}>
+                  ¿Por qué realizar este tratamiento en OralMed?
+                </h2>
+
+                <div className="subpage-benefits-grid">
+                  {activeService.benefits.map((b, i) => (
+                    <div key={i} className="benefit-card">
+                      <div style={{ color: 'var(--accent)', marginBottom: '0.75rem' }}>
+                        <CheckCircle2 size={24} />
+                      </div>
+                      <h4>{b.title}</h4>
+                      <p>{b.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* PASOS DEL PROCESO */}
+              <div style={{ backgroundColor: 'var(--bg-secondary)', borderRadius: '24px', padding: 'clamp(2rem, 4vw, 3rem)', marginBottom: '3.5rem' }}>
+                <span className="section-tag">Paso a Paso</span>
+                <h2 className="section-title" style={{ marginBottom: '2rem' }}>
+                  ¿Cómo es tu proceso con nosotros?
+                </h2>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.5rem' }}>
+                  {activeService.steps.map((s, idx) => (
+                    <div key={idx} style={{ backgroundColor: '#FFFFFF', padding: '1.5rem', borderRadius: '16px' }}>
+                      <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.3rem', color: 'var(--accent)' }}>
+                        {s.num}
+                      </span>
+                      <h4 style={{ fontWeight: 600, margin: '0.4rem 0', color: 'var(--text-primary)' }}>
+                        {s.title}
+                      </h4>
+                      <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)' }}>
+                        {s.desc}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* OTRAS ESPECIALIDADES */}
+              <div style={{ borderTop: '1px solid var(--border-hairline)', paddingTop: '2.5rem' }}>
+                <span className="section-tag">Otras Especialidades</span>
+                <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '1rem' }}>
+                  {SERVICES_DATA.filter((s) => s.id !== activeService.id).map((other) => (
+                    <button
+                      key={other.id}
+                      type="button"
+                      className="btn-secondary"
+                      onClick={() => navigateToService(other.id)}
+                    >
+                      <span>{other.title}</span>
+                      <ArrowUpRight size={14} />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
 
       {/* FOOTER */}
       <footer className="site-footer">
         <div className="footer-inner">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-            <img
-              src="./media/logo_web.png"
-              alt="OralMed"
-              className="brand-logo-img"
-            />
-            <div>
-              <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.05rem' }}>
-                OralMed · Clínica Dental & Centro Especializado Invisalign®
-              </div>
-              <div style={{ fontSize: '0.82rem', color: 'var(--text-light-muted)' }}>
-                Av. Tiradentes #29, Naco · Santo Domingo, República Dominicana
-              </div>
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', fontSize: '0.88rem' }}>
-            <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-              WhatsApp Directo
-            </a>
-            <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">
-              @oralmedrd
-            </a>
-            <a href="tel:+18094757585">+1 (809) 475-7585</a>
-          </div>
+          <p>© {new Date().getFullYear()} OralMed Clínica Dental · Naco, Santo Domingo. Todos los derechos reservados.</p>
         </div>
       </footer>
     </div>
